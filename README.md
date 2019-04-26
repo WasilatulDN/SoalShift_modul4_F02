@@ -25,6 +25,7 @@ Perhatian: Karakter ‘/’ adalah karakter ilegal dalam penamaan file atau fold
 #### Soal
 Semua file video yang tersimpan secara terpecah-pecah (splitted) harus secara otomatis tergabung (joined) dan diletakkan dalam folder “Videos”
 Urutan operasi dari kebutuhan ini adalah:
+<n>
 A. Tepat saat sebelum file system di-mount
 1. Secara otomatis folder “Videos” terbuat di root directory file system
 2. Misal ada sekumpulan file pecahan video bernama “computer.mkv.000”, “computer.mkv.001”,       “computer.mkv.002”, dst. Maka secara otomatis file pecahan tersebut akan di-join menjadi file             video “computer.mkv”
