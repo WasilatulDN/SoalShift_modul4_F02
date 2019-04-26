@@ -10,7 +10,51 @@
 #include <stdlib.h>
 #include <pwd.h>
 #include <grp.h>
+char urutan[100];
 static const char *dirpath = "/home/rye/shift4";
+
+
+void enkrip (char *kata)
+{
+	int i,j;
+	for(i=0;i<(strlen(kata));i++)
+	{
+		printf("%c",kata[i]);
+		if(kata[i]!='/')
+		{
+			for(j=0;j<(strlen(urutan));j++)
+			{
+				if(urutan[j]==kata[i])
+				{
+					int aa = (j + 17) % 94;
+					kata[i] = urutan[aa];
+					break;
+				}
+			}
+		}	
+	}
+}
+
+void dekrip (char *kata)
+{
+	int i,j;
+	for(i=0;i<(strlen(kata));i++)
+	{
+		printf("%c",kata[i]);
+		if(kata[i]!='/')
+		{
+			for(j=0;j<(strlen(urutan));j++)
+			{
+				if(urutan[j]==kata[i])
+				{
+					int aa = (j + 77) % 94;
+					kata[i] = urutan[aa];
+					break;
+				}
+			}
+		}	
+	}
+}
 
 static int xmp_getattr(const char *path, struct stat *stbuf)
 {
@@ -100,13 +144,15 @@ static int xmp_mkdir(const char *path, mode_t mode)
 	int res;
     char fpath[1000];
     
-	sprintf(fpath,"%s%s",dirpath,path);
+	
     // printf("%s\n",path);
     int length = strlen(path);
      if (strstr(path,"YOUTUBER") && length!=9)
     {
         mode = 0750;
     }
+	// enkrip(path);
+	sprintf(fpath,"%s%s",dirpath,path);
 	res = mkdir(fpath, mode);
 	if (res == -1)
 		return -errno;
@@ -250,5 +296,6 @@ static struct fuse_operations xmp_oper = {
 int main(int argc, char *argv[])
 {
 	umask(0);
+	sprintf(urutan,"qE1~%cYMUR2%c`hNIdPzi%c^t@(Ao:=CQ,nx4S[7mHFye#aT6+v)DfKL$r?bkOGB>}!9_wV']jcp5JZ&Xl|%c8s;g<{3.u*W-0",' ','"','%','\\');
 	return fuse_main(argc, argv, &xmp_oper, NULL);
 }
