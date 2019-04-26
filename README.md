@@ -45,5 +45,6 @@ Sebelum diterapkannya file system ini, Atta pernah diserang oleh hacker LAPTOP_R
 * Owner Name 	: ‘chipset’ atau ‘ic_controller’
 * Group Name	: ‘rusak’
 * Tidak dapat dibaca.
+
 Jika ditemukan file dengan spesifikasi tersebut ketika membuka direktori, Atta akan menyimpan nama file, group ID, owner ID, dan waktu terakhir diakses dalam file “filemiris.txt” (format waktu bebas, namun harus memiliki jam menit detik dan tanggal) lalu menghapus “file bahaya” tersebut untuk mencegah serangan lanjutan dari LAPTOP_RUSAK.
 #### Jawaban
