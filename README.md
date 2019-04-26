@@ -10,7 +10,7 @@ Hacker tersebut menyusup ke dalam file system yang ada di dalam PC Atta dengan m
 Atta menginginkan nama file system yang akan kalian buat adalah “AFSHiaAP”, yang nama kepanjangannya adalah AHHA’s File System: Hierarchical and Advanced Protection. Berikut ini kebutuhan yang harus kalian penuhi:
 
 ### Nomor 1
-1. Semua nama file dan folder harus terenkripsi
+Semua nama file dan folder harus terenkripsi
 Enkripsi yang Atta inginkan sangat sederhana, yaitu Caesar cipher. Namun, Kusuma mengatakan enkripsi tersebut sangat mudah dipecahkan. Dia menyarankan untuk character list diekspansi,tidak hanya alfabet, dan diacak. Berikut character list yang dipakai:
 
 __qE1~ YMUR2"`hNIdPzi%^t@(Ao:=CQ,nx4S[7mHFye#aT6+v)DfKL$r?bkOGB>}!9_wV']jcp5JZ&Xl|\8s;g<{3.u*W-0__
@@ -20,7 +20,7 @@ __“INI_FOLDER/halo”__ saat belum di-mount maka akan bernama __“n,nsbZ]wio/
 Perhatian: Karakter ‘/’ adalah karakter ilegal dalam penamaan file atau folder dalam * NIX, maka dari itu dapat diabaikan.
 
 ### Nomor 2
-2. Semua file video yang tersimpan secara terpecah-pecah (splitted) harus secara otomatis tergabung (joined) dan diletakkan dalam folder “Videos”
+Semua file video yang tersimpan secara terpecah-pecah (splitted) harus secara otomatis tergabung (joined) dan diletakkan dalam folder “Videos”
 Urutan operasi dari kebutuhan ini adalah:
 * Tepat saat sebelum file system di-mount
 1. Secara otomatis folder “Videos” terbuat di root directory file system
@@ -31,7 +31,7 @@ Untuk mempermudah kalian, dipastikan hanya video file saja yang terpecah menjadi
 5. Jangan tampilkan file pecahan di direktori manapun
 
 * Tepat saat file system akan di-unmount
-i. Hapus semua file video yang berada di folder “Videos”, tapi jangan hapus file pecahan yang           terdapat di root directory file system
-ii.Hapus folder “Videos” 
-
+1. Hapus semua file video yang berada di folder “Videos”, tapi jangan hapus file pecahan yang           terdapat di root directory file system
+2. Hapus folder “Videos” 
+ 
 
