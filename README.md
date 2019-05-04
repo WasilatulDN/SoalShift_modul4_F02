@@ -47,6 +47,35 @@ void enkrip (char *kata)
 * i < panjang kata, maka print karakter ke-i.
 * Jika karakter ke-i bukan merupakan "/", maka untuk setiap huruf dalam array urutan dicari huruf yang sama dengan karakter ke-i. 
 * Setelah itu, karakter ke-i akan diubah sesuai dengan aturan angka yang ditentukan. Misal angka yang ditentukan adalah 3, maka karakter ke-i akan menjadi 3 karakter di sebelah kanan dari karakter ke-i tersebut pada array urutan.
+* Apabila lebih dari batas array urutan, maka akan dimulai lagi dari 0.
+```
+void dekrip (char *kata)
+{
+	int i,j;
+	if(!strcmp(kata,".") || !strcmp(kata,"..")) return;
+	for(i=0;i<(strlen(kata));i++)
+	{
+		printf("%c",kata[i]);
+		if(kata[i]!='/')
+		{
+			for(j=0;j<(strlen(urutan));j++)
+			{
+				if(urutan[j]==kata[i])
+				{
+					int aa = (j + 94-31) % 94;
+					kata[i] = urutan[aa];
+					break;
+				}
+			}
+		}	
+	}
+}
+```
+* Melakukan looping untuk menghitung string yang diinputkan.
+* i < panjang kata, maka print karakter ke-i.
+* Jika karakter ke-i bukan merupakan "/", maka untuk setiap huruf dalam array urutan dicari huruf yang sama dengan karakter ke-i. 
+* Setelah itu, karakter ke-i akan diubah sesuai dengan aturan angka yang ditentukan. Misal angka yang ditentukan adalah 3, maka karakter ke-i akan menjadi 3 karakter di sebelah kiri dari karakter ke-i tersebut pada array urutan.
+* Apabila kurang dari batas array urutan, maka akan dimulai lagi dari 93.
 
 ### Nomor 2
 #### Soal
