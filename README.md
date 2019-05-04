@@ -94,6 +94,61 @@ b. Tepat saat file system akan di-unmount
 1. Hapus semua file video yang berada di folder “Videos”, tapi jangan hapus file pecahan yang           terdapat di root directory file system
 2. Hapus folder “Videos” 
 #### Jawaban
+* Proses penggabunggan file video terdapat pada fungsi pre_init.
+```
+char folder[100000] = "/Videos";
+enkrip(folder);
+char fpath[1000];
+sprintf(fpath,"%s%s", dirpath, folder);
+mkdir(fpath,0755);
+memset(fpath,0,sizeof(fpath));
+```
+* Digunakan untuk membuat folder Videos yang nantinya akan digunakan untuk menyimpan video yang telah di join. Permission dari folder Videos adalah 0755.
+```
+pid_t child1;
+		child1=fork();
+		if(child1==0){
+			DIR *dp;
+			struct dirent *de;
+			dp = opendir(dirpath);
+```
+* Child proses akan melakukan pengecekan pada root file system.
+```
+while((de = readdir(dp))){
+				if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0){
+					char ext[1000] = ".mp4";
+					enkrip(ext);
+					if(strlen(de->d_name)>7 && strncmp(de->d_name+strlen(de->d_name)-8,ext,4)==0){
+```
+ * Tiap file pada root file system akan dicek apakah dia memiliki ekstensi .mp4 dan merupakan partisi video atau tidak.
+```
+              char joined[1000];
+							char video[1000] = "/Videos";
+							enkrip(video);
+							sprintf(joined,"%s%s/",dirpath,video);
+							strncat(joined,de->d_name,strlen(de->d_name)-4);
+							FILE* mainj;
+							mainj = fopen(joined,"a+");
+```
+* Mengecek pada folder Videos apakah terdapat file video dengan nama yang sama seperti file yang di cek atau tidak. Mode fopen adalah a+ sehingga jika terdapat video dengan nama yang dimaksud maka akan dilakukan append, sedangkan jika tidak terdapat file dengan nama yang dimaksud, maka akan dibuat file dengan nama yang sama.
+```
+              FILE* need;
+							char this[1000];
+							sprintf(this,"%s/%s",dirpath,de->d_name);
+							need = fopen(this,"r");
+							int c;
+```
+* Membuka file yang di cek dengan mode read.
+```
+                while(1) {
+   								c = fgetc(need);
+   								if( feof(need) ) {
+   								   break;
+   								}
+   								fprintf(mainj,"%c",c);
+   							}
+```
+* Menyalin isi dari file yang di cek ke file hasil join yang ada pada folder Videos. Proses tersebut dilakukan sampai seluruh isi folder telah di cek seluruhnya.
 
 ### Nomor 3
 #### Soal
@@ -104,7 +159,69 @@ Sebelum diterapkannya file system ini, Atta pernah diserang oleh hacker LAPTOP_R
 
 Jika ditemukan file dengan spesifikasi tersebut ketika membuka direktori, Atta akan menyimpan nama file, group ID, owner ID, dan waktu terakhir diakses dalam file “filemiris.txt” (format waktu bebas, namun harus memiliki jam menit detik dan tanggal) lalu menghapus “file bahaya” tersebut untuk mencegah serangan lanjutan dari LAPTOP_RUSAK.
 #### Jawaban
+* Proses pengecekan owner dan grup dilakukan pada fungsi readdir.
+```
+dp = opendir(fpath);
+if (dp == NULL)
+	return -errno;
 
+while ((de = readdir(dp)) != NULL) {
+```
+* Proses pengecekan dilakukan pada setiap file yang ada pada folder yang sedang di cek.
+```
+char name[1000];
+sprintf(name, "%s/%s", fpath, de->d_name);
+struct stat sfile;
+stat(name, &sfile); 
+```
+* Digunakan untuk mendapatkan informasi dari file yang sedang dicek.
+```
+struct passwd *user = getpwuid(sfile.st_uid);
+struct group  *group = getgrgid(sfile.st_gid);
+```
+* Digunakan untuk mendapatkan informasi tentang user ID dan grup ID dari file yang sedang dicek.
+```
+int usercomp1 = strcmp (user->pw_name, "chipset");
+int usercomp2 = strcmp (user->pw_name, "ic_controller");
+int grupcomp = strcmp (group->gr_name, "rusak"); 
+```
+* Digunakan untuk mengecek apakah nama user dari file yang dicek adalah chipset atau ic_controller juga mengecek apakah nama grup dari file yang dicek adalah rusak.
+```
+if ((usercomp1 == 0 || usercomp2 == 0) && grupcomp == 0 && ((sfile.st_mode & S_IRUSR) == 0 || (sfile.st_mode & S_IRGRP) == 0 || (sfile.st_mode & S_IROTH) == 0) ){
+```
+* Jika nama user dari file yang dicek adalah chipset atau ic_controller dan nama grup dari file yang dicek adalah rusak dan file tidak bisa dibaca, maka :
+```
+FILE *file;
+char miris[1000]="/filemiris.txt";
+char filemiris[1000];
+enkrip(miris);
+sprintf(filemiris, "%s%s", dirpath,miris);
+file = fopen(filemiris, "a+");
+```
+* Digunakan untuk membuka filemiris.txt dengan mode a+. Jika filemiris.txt tidak ada, maka akan dibuat. Jika filemiris.txt ada, maka akan dilakukan penambahan pada file tersebut.
+```
+char isiFile[1000];
+char namafile[1000];
+strcpy(namafile,de->d_name);
+dekrip(namafile);
+```
+* Digunakan untuk mendapatkan nama file yang sedang dicek.
+```
+char buff[20];
+time_t now = time(NULL);
+strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+```
+* Digunakan untuk mendapatkan waktu saat file dicek dan diubah ke string.
+```
+sprintf(isiFile, "%s %d:%d %s\n", namafile, user->pw_uid, group->gr_gid, buff);
+fputs(isiFile, file);
+```
+* Variabel isiFile diisi dengan nama file, user ID, grup ID, dan waktu saat file di cek.
+```
+fclose(file);
+remove(name);
+```
+* File filemiris.txt ditutup dan file yang memenuhi kriteria user ID, grup ID dihapus.
 ### Nomor 4
 #### Soal
 Pada folder __YOUTUBER__, setiap membuat folder permission foldernya akan otomatis menjadi 750. Juga ketika membuat file permissionnya akan otomatis menjadi 640 dan ekstensi filenya akan bertambah __“.iz1”.__ File berekstensi __“.iz1”__ tidak bisa diubah permissionnya dan memunculkan error bertuliskan *“File ekstensi iz1 tidak boleh diubah permissionnya.”*
@@ -236,7 +353,126 @@ static int xmp_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 #### Soal
 Ketika mengedit suatu file dan melakukan save, maka akan terbuat folder baru bernama __Backup__ kemudian hasil dari save tersebut akan disimpan pada backup dengan nama __namafile_[timestamp].ekstensi.__ Dan ketika file asli dihapus, maka akan dibuat folder bernama __RecycleBin__, kemudian file yang dihapus beserta semua backup dari file yang dihapus tersebut (jika ada) di zip dengan nama __namafile_deleted_[timestamp].zip__ dan ditaruh kedalam folder RecycleBin (file asli dan backup terhapus). Dengan format __[timestamp]__ adalah __yyyy-MM-dd_HH:mm:ss__
 #### Jawaban
+* Pengecekan dilakukan pada fungsi write (saat mengedit) dan unlink (saat menghapus file)
+```
+char newname[1000];
+char folder[1000] = "/Backup";
+enkrip(folder);
+char folderdir[1000];
+sprintf(folderdir,"%s%s",dirpath,folder);
+mkdir(folderdir,0755);
+```
+* Membuat folder Backup dengan permission 0755
+```
+char t[1000];
+time_t now = time(NULL);
+har fname[1000];
+trftime(t, 22, "_%Y-%m-%d_%H:%M:%S", localtime(&now));
+```
+* Digunakan untuk mendapatkan waktu saat file diedit dan diubah ke string.
+```
+int check_ext(char* file){
+	ind_ext=0;
+	while(ind_ext<strlen(file)&&file[ind_ext]!='.') ind_ext++;
+	memset(ext,0,sizeof(ext));
+	strcpy(ext,file+ind_ext);
+	return ind_ext;
+}
+```
+* Digunakan untuk mengecek ekstensi file yang diedit. ind_ext menyimpan posisi tanda titik.
+```
+check_ext(name);
+char shortn[100000];
+memset(shortn,0,strlen(shortn));
+strncpy(shortn,name,ind_ext);
+sprintf(newname,"/Backup%s%s%s",shortn,t,ext);
+```
+* Variabel newname berisi path file baru dengan format __namafile_[timestamp].ekstensi.__
+```
+pid_t child1;
+		child1=fork();
+		if(child1==0){
+			execl("/bin/cp","/bin/cp",fpath,fname,NULL);
+			exit(EXIT_SUCCESS);
+		}
+```
+* Digunakan untuk menyalin isi file yang diedit ke file baru yang telah dibuat.
+* Sedangkan pada saat file dihapus :
+```
+char folder[1000] = "/RecycleBin";
+enkrip(folder);
+char fpath[1000];
+sprintf(fpath,"%s%s", dirpath, folder);
+mkdir(fpath,0755);
+```
+* Digunakan untuk membuat folder RecycleBin dengan permission 0755
+```
+char t[1000];
+time_t now = time(NULL);
+strftime(t, 22, "_%Y-%m-%d_%H:%M:%S", localtime(&now));
+```
+* Digunakan untuk mendapatkan waktu saat file dihapus dan diubah ke string.
+```
+sprintf(zip,"/RecycleBin%s_deleted_%s.zip",name,t);
+enkrip(name);
+sprintf(fname,"%s%s",dirpath,name); //yg asli dienkrip
+enkrip(zip);
+sprintf(fzip,"%s%s",dirpath,zip); //tempat zip dienkrip
+pid_t child1;
+char dum[10000];
+dekrip(name);
+sprintf(dum,"%s%s",dirpath,name); //yang asli dekrip, tempat copy
+enkrip(name);
 
+int tunggu;
+child1=fork();
+if(child1==0){
+	execl("/bin/cp","/bin/cp",fname,dum,NULL);
+	exit(EXIT_SUCCESS);
+}
+```
+* Digunakan untuk menyalin file yang dihapus ke file baru
+```
+if(child1==0){
+	execl("/usr/bin/zip","/usr/bin/zip","-q","-m","-j",fzip,dum,NULL); //hasil cp di zip di fzip
+	exit(EXIT_SUCCESS);
+}
+else{
+	waitpid(child1, &tunggu, 0);
+}
+remove(fname); //yang asli dihapus
+```
+* File baru di zip dengan format __namafile_deleted_[timestamp].zip__
+```
+			while((de = readdir(dp))){
+				printf("%s\n%s\n%d\n",name,de->d_name,ind_ext-1);
+
+			if(strncmp(name+1,de->d_name,ind_ext-1)==0){
+				printf("%s\n%s\n",name,de->d_name);
+				memset(fname,0,sizeof(fname));
+				dekrip(name);
+				sprintf(fname,"%s/%s",foldbackp,de->d_name); //bu yg dienkirp
+				enkrip(name);
+				char dum[10000];
+				dekrip(de->d_name);
+				sprintf(dum,"%s/%s",dirpath,de->d_name); //root+bu dekrip, tempat copy
+				enkrip(de->d_name);				
+
+				child1=fork();
+				if(child1==0){
+					execl("/bin/cp","/bin/cp",fname,dum,NULL);
+					exit(EXIT_SUCCESS);
+				}
+```
+* File back up disalin ke file baru 
+```
+				child1=fork();
+				if(child1==0){
+					execl("/usr/bin/zip","/usr/bin/zip","-q","-m","-j","-u",fzip,dum,NULL);
+					exit(EXIT_SUCCESS);
+				}
+```
+* File baru ditambahkan ke file zip dengan format __namafile_deleted_[timestamp].zip__
 ### Catatan
 * Semua nama file dan folder yang terdapat pada soal harus memenuhi syarat soal no. 1 (terenkripsi saat belum di-mount dan terdekripsi saat di-mount)
 * Tidak diperkenankan menggunakan __system()__ dan __exec*()__, kecuali ada pengecualian di butir soal.
