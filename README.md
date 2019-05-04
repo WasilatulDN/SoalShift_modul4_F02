@@ -131,7 +131,50 @@ static int xmp_chmod(const char *path, mode_t mode)
 }
 ```
 * Jika syarat sebelumnya tidak sesuai, maka melakukan perubahan permission.
+```
+static int xmp_create(const char* path, mode_t mode, struct fuse_file_info* fi) {
 
+    (void) fi;
+
+    int res;
+    char fpath[1000];
+	char spath[1000];
+	sprintf(spath,"%s",path);
+	int jum;
+	
+	char *found;
+	found=strstr(spath,"YOUTUBER");
+    if(found)
+    {
+		int i=found-spath;
+		while(spath[i] != '\0')
+		{
+			if(spath[i]=='/')
+			jum++;
+			i++;
+		}
+		if(jum<2)
+		{
+			mode = 0640;
+       		strcat(spath,".iz1");
+		}
+    }
+	enkrip(spath);
+    
+	sprintf(fpath,"%s%s",dirpath,spath);
+	// mode=0640;
+    res = creat(fpath, mode);
+    if(res == -1)
+	return -errno;
+
+    close(res);
+
+    return 0;
+}
+```
+* Melakukan pengecekan substring pada spath. Jika mengandung kata "YOUTUBER", maka dimasukkan ke dalam variabel found.
+* Jika state pada variabel found benar, maka melakukan count jumlah "/" setelah kata "YOUTUBER".
+* Kemudian, pada "/" pertama setelah kata "YOUTUBER" dilakukan concat ".iz1" .
 
 ### Nomor 5
 #### Soal
