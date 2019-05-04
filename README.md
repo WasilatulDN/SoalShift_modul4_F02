@@ -50,47 +50,47 @@ memset(fpath,0,sizeof(fpath));
 * Digunakan untuk membuat folder Videos yang nantinya akan digunakan untuk menyimpan video yang telah di join. Permission dari folder Videos adalah 0755.
 ```
 pid_t child1;
-		child1=fork();
-		if(child1==0){
-			DIR *dp;
-			struct dirent *de;
-			dp = opendir(dirpath);
+child1=fork();
+if(child1==0){
+	DIR *dp;
+	struct dirent *de;
+	dp = opendir(dirpath);
 ```
 * Child proses akan melakukan pengecekan pada root file system.
 ```
 while((de = readdir(dp))){
-				if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0){
-					char ext[1000] = ".mp4";
-					enkrip(ext);
-					if(strlen(de->d_name)>7 && strncmp(de->d_name+strlen(de->d_name)-8,ext,4)==0){
+	if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0){
+	char ext[1000] = ".mp4";
+	enkrip(ext);
+	if(strlen(de->d_name)>7 && strncmp(de->d_name+strlen(de->d_name)-8,ext,4)==0){
 ```
  * Tiap file pada root file system akan dicek apakah dia memiliki ekstensi .mp4 dan merupakan partisi video atau tidak.
 ```
-              char joined[1000];
-							char video[1000] = "/Videos";
-							enkrip(video);
-							sprintf(joined,"%s%s/",dirpath,video);
-							strncat(joined,de->d_name,strlen(de->d_name)-4);
-							FILE* mainj;
-							mainj = fopen(joined,"a+");
+        char joined[1000];
+	char video[1000] = "/Videos";
+	enkrip(video);
+	sprintf(joined,"%s%s/",dirpath,video);
+	strncat(joined,de->d_name,strlen(de->d_name)-4);
+	FILE* mainj;
+	mainj = fopen(joined,"a+");
 ```
 * Mengecek pada folder Videos apakah terdapat file video dengan nama yang sama seperti file yang di cek atau tidak. Mode fopen adalah a+ sehingga jika terdapat video dengan nama yang dimaksud maka akan dilakukan append, sedangkan jika tidak terdapat file dengan nama yang dimaksud, maka akan dibuat file dengan nama yang sama.
 ```
-              FILE* need;
-							char this[1000];
-							sprintf(this,"%s/%s",dirpath,de->d_name);
-							need = fopen(this,"r");
-							int c;
+        FILE* need;
+	char this[1000];
+	sprintf(this,"%s/%s",dirpath,de->d_name);
+	need = fopen(this,"r");
+	int c;
 ```
 * Membuka file yang di cek dengan mode read.
 ```
-                while(1) {
-   								c = fgetc(need);
-   								if( feof(need) ) {
-   								   break;
-   								}
-   								fprintf(mainj,"%c",c);
-   							}
+       while(1) {
+   		c = fgetc(need);
+   		if( feof(need) ) {
+   			break;
+   		}
+   		fprintf(mainj,"%c",c);
+   	}
 ```
 * Menyalin isi dari file yang di cek ke file hasil join yang ada pada folder Videos. Proses tersebut dilakukan sampai seluruh isi folder telah di cek seluruhnya.
 ### Nomor 3
