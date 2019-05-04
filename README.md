@@ -38,61 +38,7 @@ b. Tepat saat file system akan di-unmount
 1. Hapus semua file video yang berada di folder “Videos”, tapi jangan hapus file pecahan yang           terdapat di root directory file system
 2. Hapus folder “Videos” 
 #### Jawaban
-* Proses penggabunggan file video terdapat pada fungsi pre_init.
-```
-char folder[100000] = "/Videos";
-enkrip(folder);
-char fpath[1000];
-sprintf(fpath,"%s%s", dirpath, folder);
-mkdir(fpath,0755);
-memset(fpath,0,sizeof(fpath));
-```
-* Digunakan untuk membuat folder Videos yang nantinya akan digunakan untuk menyimpan video yang telah di join. Permission dari folder Videos adalah 0755.
-```
-pid_t child1;
-child1=fork();
-if(child1==0){
-	DIR *dp;
-	struct dirent *de;
-	dp = opendir(dirpath);
-```
-* Child proses akan melakukan pengecekan pada root file system.
-```
-while((de = readdir(dp))){
-	if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0){
-	char ext[1000] = ".mp4";
-	enkrip(ext);
-	if(strlen(de->d_name)>7 && strncmp(de->d_name+strlen(de->d_name)-8,ext,4)==0){
-```
- * Tiap file pada root file system akan dicek apakah dia memiliki ekstensi .mp4 dan merupakan partisi video atau tidak.
-```
-        char joined[1000];
-	char video[1000] = "/Videos";
-	enkrip(video);
-	sprintf(joined,"%s%s/",dirpath,video);
-	strncat(joined,de->d_name,strlen(de->d_name)-4);
-	FILE* mainj;
-	mainj = fopen(joined,"a+");
-```
-* Mengecek pada folder Videos apakah terdapat file video dengan nama yang sama seperti file yang di cek atau tidak. Mode fopen adalah a+ sehingga jika terdapat video dengan nama yang dimaksud maka akan dilakukan append, sedangkan jika tidak terdapat file dengan nama yang dimaksud, maka akan dibuat file dengan nama yang sama.
-```
-        FILE* need;
-	char this[1000];
-	sprintf(this,"%s/%s",dirpath,de->d_name);
-	need = fopen(this,"r");
-	int c;
-```
-* Membuka file yang di cek dengan mode read.
-```
-       while(1) {
-   		c = fgetc(need);
-   		if( feof(need) ) {
-   			break;
-   		}
-   		fprintf(mainj,"%c",c);
-   	}
-```
-* Menyalin isi dari file yang di cek ke file hasil join yang ada pada folder Videos. Proses tersebut dilakukan sampai seluruh isi folder telah di cek seluruhnya.
+
 ### Nomor 3
 #### Soal
 Sebelum diterapkannya file system ini, Atta pernah diserang oleh hacker LAPTOP_RUSAK yang menanamkan user bernama “chipset” dan “ic_controller” serta group “rusak” yang tidak bisa dihapus. Karena paranoid, Atta menerapkan aturan pada file system ini untuk menghapus “file bahaya” yang memiliki spesifikasi:
@@ -107,6 +53,85 @@ Jika ditemukan file dengan spesifikasi tersebut ketika membuka direktori, Atta a
 #### Soal
 Pada folder __YOUTUBER__, setiap membuat folder permission foldernya akan otomatis menjadi 750. Juga ketika membuat file permissionnya akan otomatis menjadi 640 dan ekstensi filenya akan bertambah __“.iz1”.__ File berekstensi __“.iz1”__ tidak bisa diubah permissionnya dan memunculkan error bertuliskan *“File ekstensi iz1 tidak boleh diubah permissionnya.”*
 #### Jawaban
+```
+static int xmp_mkdir(const char *path, mode_t mode)
+{
+	int res;
+    char fpath[1000];
+    char spath[1000];
+	sprintf(spath,"%s",path);
+	enkrip(spath);
+	
+    // printf("%s\n",path);
+    int length = strlen(path);
+     if (strstr(path,"YOUTUBER") && length!=9)
+    {
+        mode = 0750;
+    }
+	// enkrip(path);
+	sprintf(fpath,"%s%s",dirpath,spath);
+	res = mkdir(fpath, mode);
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+```
+* Melakukan pengecekan pada substring dan panjang path. Apakah mengandung kata "YOUTUBER" dan memiliki panjang 9 karakter atau tidak.
+* Jika memenuhi syarat tersebut, maka mengubah mode menjadi 0750.
+
+```
+static int xmp_chmod(const char *path, mode_t mode)
+{
+	int res;
+    char fpath[1000];
+    char name[1000];
+	char temp[1000];
+	strcpy(temp,path);
+	enkrip(temp);
+	sprintf(name, "%s%s", dirpath, temp);
+	struct stat sfile;
+	stat(name, &sfile);
+	// sprintf(fpath,"%s%s",dirpath,path);
+    int panjang = strlen(path);
+    if(path[panjang-1]=='1' && path[panjang-2]=='z' && path[panjang-3]=='i' && S_ISDIR(sfile.st_mode)==0)
+    {
+        pid_t child_id;
+		int status;
+		child_id=fork();
+		if(child_id == 0)
+		{
+			char *argv[5]={"zenity","--error","--text=\"File ekstensi iz1 tidak boleh diubah permissionnya.\n\"","--title=\"Warning!\"",NULL};
+			execv("/usr/bin/zenity",argv);
+		}
+```
+* Melakukan pengecekan karakter terakhir dari path. apakah mengandung karakter "iz1" dan merupakan direktori. 
+* Jika syarat tersebut benar, maka akan mengeluarkan pesan error.
+```
+		else
+		{
+			while((wait(&status)) > 0);
+		}
+    }
+```
+* Menunggu hingga proses sebelumnya selesai.
+```
+    else
+    {
+		char spath[1000];
+		sprintf(spath,"%s",path);
+		enkrip(spath);
+		// char fpath[1000];
+		sprintf(fpath,"%s%s",dirpath,spath);
+        res = chmod(fpath, mode);
+	    if (res == -1)
+		    return -errno;
+    }
+	return 0;
+}
+```
+* Jika syarat sebelumnya tidak sesuai, maka melakukan perubahan permission.
+
 
 ### Nomor 5
 #### Soal
