@@ -383,7 +383,6 @@ static int xmp_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	char spath[1000];
 	sprintf(spath,"%s",path);
 	int jum;
-	int i=0;
 	
 	char *found;
 	found=strstr(spath,"YOUTUBER");
