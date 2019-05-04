@@ -20,6 +20,33 @@ Misalkan ada file bernama “halo” di dalam folder “INI_FOLDER”, dan key y
 __“INI_FOLDER/halo”__ saat belum di-mount maka akan bernama __“n,nsbZ]wio/QBE#”__, saat telah di-mount maka akan otomatis terdekripsi kembali menjadi __“INI_FOLDER/halo” .__
 Perhatian: Karakter ‘/’ adalah karakter ilegal dalam penamaan file atau folder dalam * NIX, maka dari itu dapat diabaikan.
 #### Jawaban
+```
+void enkrip (char *kata)
+{
+	int i,j;
+	if(!strcmp(kata,".") || !strcmp(kata,"..")) return;
+	for(i=0;i<(strlen(kata));i++)
+	{
+		printf("%c",kata[i]);
+		if(kata[i]!='/')
+		{
+			for(j=0;j<(strlen(urutan));j++)
+			{
+				if(urutan[j]==kata[i])
+				{
+					int aa = (j + 31) % 94;
+					kata[i] = urutan[aa];
+					break;
+				}
+			}
+		}	
+	}
+}
+```
+* Melakukan looping untuk menghitung string yang diinputkan.
+* i < panjang kata, maka print karakter ke-i.
+* Jika karakter ke-i bukan merupakan "/", maka untuk setiap huruf dalam array urutan dicari huruf yang sama dengan karakter ke-i. 
+* Setelah itu, karakter ke-i akan diubah sesuai dengan aturan angka yang ditentukan. Misal angka yang ditentukan adalah 3, maka karakter ke-i akan menjadi 3 karakter di sebelah kanan dari karakter ke-i tersebut pada array urutan.
 
 ### Nomor 2
 #### Soal
